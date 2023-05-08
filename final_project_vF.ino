@@ -9,8 +9,8 @@
 BLEScan* pBLEScan;
 
 //Bluetooth RSSI - determines proximity of device
-const short near_thrsh = -55;
-const short far_thrsh = -82;  
+const short near_threshold = -55;
+const short far_threshold = -82;  
 const short timeout = 5; //how long to wait looking for a bluetooth device
 
 //In order to connect to Bluetooth plug - using compatible app IFTTT
@@ -19,12 +19,12 @@ const char* turn_off = "https://maker.ifttt.com/trigger/turnoff/with/key/YFKYTQB
 const char* ssid = "Isabelle's Phone";
 const char* pswd = "isabellephone10"; //using personal hotspot instead of Columbia wifi
 
-short prox = 0;
+int prox = 0;
 bool near = true;
-long lit = 0;
+int lit = 0;
 
 
-void wifiTask() {
+void wifiConnect() {
       WiFi.begin(ssid, pswd);
       Serial.print("Connecting to Wifi");
       while(WiFi.status() != WL_CONNECTED){
@@ -34,7 +34,7 @@ void wifiTask() {
 }
 
 
-void wifis(const char* action){
+void triggerRequest(const char* action){
 // wait for WiFi connection
   if(WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
@@ -48,8 +48,8 @@ void wifis(const char* action){
     if(httpCode > 0) {
       Serial.printf("[HTTP] GET... code: %d\n", httpCode);
       if(httpCode == HTTP_CODE_OK) {
-        String payload = http.getString();
-        Serial.println(payload);
+        String addr = http.getString();
+        Serial.println(addr);
       }
     } else {
       Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -57,8 +57,8 @@ void wifis(const char* action){
     http.end();
   
   }else{
-    wifiTask();
-    wifis(action);
+    wifiConnect();
+    triggerRequest(action);
   }
 }
 
@@ -72,18 +72,18 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
             lit = millis();
             
             //Determine if bluetooth device is close enough to turn on
-            if((prox > near_thrsh)&&(near)){
+            if((prox > near_threshold)&&(near)){
                 Serial.println("Device in Close Range");
                 Serial.println("******** LIGHT ON ***********");
-                wifis(turn_on);
+                triggerRequest(turn_on);
                 near = false;
             }
 
             //determine if bluetooth device is far enough to turn off
-            else if((prox < far_thrsh) && (!near)){
+            else if((prox < far_threshold) && (!near)){
                 Serial.println("Device went away");
                 Serial.println("******** LIGHT OFF **********");
-                wifis(turn_off);
+                triggerRequest(turn_off);
                 near = true;
             }
         }
@@ -93,7 +93,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     }
 };
 
-void bleTask(){
+void bleScan(){
   // configure bluetooth scan
   BLEDevice::init("CES FINAL PROJECT");
   pBLEScan = BLEDevice::getScan(); //create new scan
@@ -104,14 +104,13 @@ void bleTask(){
 }
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
 
   //Setup Wifi
-  wifiTask();
+  wifiConnect();
 
   //Setup BLE
-  bleTask();
+  bleScan();
   BLEScanResults foundDevices = pBLEScan->start(0);
 }
 
