@@ -1,5 +1,7 @@
 # Final Project - Bluetooth-Activated Lamp
 
+<img width="432" alt="Screen Shot 2023-05-08 at 12 25 59 PM" src="https://user-images.githubusercontent.com/80801327/236877881-e36a527a-8aa0-4fc4-941e-604d5ac33ddb.png">
+
 ## Project Overview
 As the final project for my Creative Embedded Systems course, it was very open-ended and used as an opportunity to synthesize the topics covered over the course of the semester. In class, we learned how to connect an ESP32 via wifi connection, so for my project, I decided to expand on that by also using ESP32 Bluetooth capabilities. The goal of my project was to create a device that uses Bluetooth to automatically turn on a lamp when it detects someone with a Bluetooth device in range (i.e. smartphone or smartwatch), and to automatically turn it off when the person walks away. 
 
@@ -13,15 +15,23 @@ Since my project is mostly software-based, I did not want the enclosure design t
 
 Since the lampshade on the lamp I used is white, I decided to create a small cardboard "shelf" inside of the lampshade for the ESP32 to sit on so it is hidden from the user.  
 
+![IMG_8912](https://user-images.githubusercontent.com/80801327/236877992-7b9aa3fc-d37c-4b25-8dc8-268a8d0682e9.jpeg)
+
 ## Technical Description
 From a hardware perspective, this device is set up by plugging the ESP32 into my laptop (a battery would have been ideal, but we did not have access to one) and setting it in the enclosure box behind the lampshade. The LED lamp is plugged into the smart plug-in, which is triggered through Bluetooth.
 
+![IMG_8922](https://user-images.githubusercontent.com/80801327/236878101-1b513ab5-41aa-4044-b6f7-0eb515476ca4.jpeg)
+
 From a software perspective, this device is configured so that the ESP32 acts as a client, scanning for Bluetooth devices and detecting how strong the signal is between the ESP32 and the detected device through the RSSI (received signal strength indicator). If it is within a certain strength threshold, the ESP32 will trigger the lamp to be turned on via the smart plug. If the lamp is already on and the ESP32 detects that the device has moved out of the threshold range, the lamp will turn off.
+
+<img width="545" alt="Screen Shot 2023-05-08 at 12 29 17 PM" src="https://user-images.githubusercontent.com/80801327/236878498-970957f5-3ac8-4633-99e5-69d539baf154.png">
 
 The smart plug is operated through an app called "Smart Life," so I used another app called "IFTTT" in order to create the trigger for the lamp to automatically turn on and off. IFTTT allows the user to set up triggers between the internet and other applications on their device. In this case, I set up two triggers: one to turn on the lamp when the request is received, and one to turn off the lamp when another request is received. In the Arduino IDE, the internet request to execute the trigger occurs by the ESP32 using HTTP GET requests. 
 
 ## Problems Encountered Along the Way
 From a software perspective, this project was very complicated because the smart plug-in is activated using an app called "Smart Life." Originally, I had hoped that when the ESP32 detected a person with a smartphone in range, it could connect to the smart plug directly to turn on the lamp. However, since this plug-in is activated through an app, I had to use another app, IFTTT, in order to create a trigger, which required a lot of extra research to figure out how to then execute the trigger via the ESP32. 
+
+<img width="254" alt="Screen Shot 2023-05-08 at 12 31 18 PM" src="https://user-images.githubusercontent.com/80801327/236878921-6f1080eb-d640-449f-91a8-a8a895858b73.png">
 
 Additionally, I had originally hoped that I could configure the device to be specific to my iPhone (i.e. the lamp was only triggered to turn on or off if my specific phone was in range) rather than any Bluetooth device. However, I learned that Apple will randomize the Bluetooth addresses of their devices for privacy reasons, which made it very difficult to detect only my specific iPhone. For this reason, I decided to configure the device so that it is triggered by any Bluetooth device that is in close enough range, but that has also posed problems because living in a college dorm in NYC, there have always been multiple Bluetooth devices within range when I was testing the device that I did not have control over. If I were to have more time to work on this project, I would figure out a more practical way to trigger the lamp because even though the range trigger does work, the lamp is turning on and off every few seconds since it is constantly being triggered by the many Bluetooth devices in range. 
 
